@@ -1,0 +1,57 @@
+- name: Install Nginx on Debian
+  apt:
+    name: nginx
+    state: present
+  become: yes
+  when: ansible_os_family == "Debian"
+- name: Install Nginx on CentOS
+  yum:
+    name: nginx
+    state: present
+  become: yes
+  when: ansible_os_family == "RedHat"
+- name: Create log directories for users
+  file:
+    path: "/var/log/nginx/{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - user1
+    - user2
+    - user3
+  become: yes
+- name: Create Nginx config from template
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/sites-available/default
+    mode: '0644'
+  notify: Restart Nginx
+  become: yes
+  when: ansible_os_family == 'Debian'
+- name: Create Nginx config from template in CentOS
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/conf.d/default.conf
+    mode: '0644'
+  notify: Restart Nginx
+  become: yes
+  when: ansible_os_family == 'RedHat'
+- name: Create index.html in Ubuntu
+  template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    mode: '0644'
+  become: yes
+  when: ansible_os_family == 'Debian'
+- name: Create index.html in CentOS
+  template:
+    src: index.html.j2
+    dest: /usr/share/nginx/html/index.html
+    mode: '0644'
+  become: yes
+  when: ansible_os_family == 'RedHat'
+- name: Create directory /var/www/html
+  file:
+    path: /var/www/html
+    state: directory
+    mode: '0644' 

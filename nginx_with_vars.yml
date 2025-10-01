@@ -1,0 +1,33 @@
+- name: Install Nginx with variables
+  hosts: webservers
+  become: yes
+  vars:
+    nginx_conf_path: /etc/nginx/sites-available/default
+    app_name: myapp
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+    - name: Start Nginx service
+      service:
+        name: nginx
+        state: started
+    - name: Configure Nginx port
+      template:
+        src: nginx.conf.j2
+        dest: "{{ nginx_conf_path }}"
+        mode: '0644'
+      notify: Restart Nginx
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: started
+    - name: Debug variable app_name
+      debug: 
+        msg: "My app name is {{ app_name }}"
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

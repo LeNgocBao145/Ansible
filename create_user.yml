@@ -1,0 +1,12 @@
+- name: Create deploy user on webservers
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Create user deploy
+      user:
+        name: deploy
+        state: present
+        shell: /bin/bash
+        create_home: yes
+        groups: sudo
+        append: yes

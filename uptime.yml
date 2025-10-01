@@ -1,0 +1,10 @@
+- name: Run uptime shell script
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Uptime Shell Script
+      shell: uptime -p
+      register: uptime_output
+    - name: Uptime Script Output
+      debug:
+        msg: '{{ uptime_output }}'

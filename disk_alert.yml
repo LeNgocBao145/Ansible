@@ -1,0 +1,81 @@
+- name: Check disk and alert
+  hosts: webservers
+  tasks:
+    - name: Get disk usage
+      shell: df -h / | tail -1 | awk '{print $5}' | cut -d'%' -f1
+      register: disk_usage
+      ignore_errors: yes
+    - name: Create alert file if disk usage over 80%
+      copy:
+        content: "Warning: Disk usage is {{ disk_usage.stdout }}% on {{ ansible_hostname }}!"
+        dest: /tmp/disk_alert.txt
+        mode: '0644'
+      when: disk_usage.stdout | int > 80
+      become: yes
+    - name: Send email when disk is almost full
+      mail:
+        host: smtp.gmail.com
+        port: 587
+        username: "{{ email_username }}"
+        password: "{{ email_pass }}"
+        to: "himagito@gmail.com"
+        subject: "Disk Usage Alert"
+        body: "Disk usage is {{ disk_usage.stdout }}%"
+      delegate_to: localhost
+      when: disk_usage.stdout | int > 80
+#    - name: Send Telegram Alert
+#      community.general.telegram:
+#        token: "{{ telegram_token }}"
+#        chat_id: "{{ telegram_chat_id }}"
+#        msg: "Disk usage over 90% on {{ inventory_hostname }}"
+    - name: Send Telegram Alert
+      community.general.telegram:
+        token: "{{ telegram_token }}"
+        api_method: sendMessage
+        api_args:
+          chat_id: "{{ telegram_chat_id }}"
+#          text: "Disk usage over 90% on {{ inventory_hostname }}"
+          text: |
+            🚨 *Disk Usage Alert* 🚨
+
+            *Host:* `{{ inventory_hostname }}`
+            *Usage:* *{{ disk_usage.stdout }}%*
+
+            ⚠️ The disk usage is over *90%*\. Please take action\!
+          parse_mode: "MarkdownV2"
+#          parse_mode: None
+      when: disk_usage.stdout | int > 80
+    - name: Send Slack Alert
+      community.general.slack:
+        token: "{{ slack_token }}"
+        msg: "🚨 Disk usage alert on {{ inventory_hostname }}"
+        channel: "#alert"
+      when: disk_usage.stdout | int > 80
+    - name: Send Slack Alert via Webhook
+      uri:
+        url: "{{ slack_webhook_url }}"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {
+            "text": "🚨 Disk usage over 90% on {{ inventory_hostname }}"
+          }
+        body_format: json
+        status_code: 200
+      when: disk_usage.stdout | int > 80
+    - name: Send Discord Alert
+      uri:
+        url: "{{ discord_webhook_url }}"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body_format: json
+        body:
+          content: "🚨 Disk usage over 90% on {{ inventory_hostname }}"
+      when: disk_usage.stdout | int > 80
+    - name: Debug disk usage
+      debug:
+        msg: "Disk usage is {{ disk_usage.stdout }}% - under control!"
+      when: disk_usage.stdout | int <= 80
+

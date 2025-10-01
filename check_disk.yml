@@ -1,0 +1,10 @@
+- name: Check disk usage
+  hosts: webservers
+  tasks:
+    - name: Get disk usage
+      shell: df -h / | tail -1 | awk '{print $5}' | cut -d'%' -f1
+      register: disk_usage
+    - name: Fail if disk usage is over 90%
+      debug:
+        msg: "Disk usage is {{ disk_usage.stdout }}% - too high!"
+      failed_when: disk_usage.stdout | int >= 90

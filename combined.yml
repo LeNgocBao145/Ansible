@@ -1,0 +1,30 @@
+- name: Create deploy user and app directory then run cpu check script
+  hosts: dbservers
+  become: yes
+  tasks:
+  - name: Create user deploy
+    user:
+      name: deploy
+      state: present
+      shell: /bin/bash
+      create_home: yes
+  - name: Create /var/app directory
+    file:
+      path: /var/app
+      state: directory
+      mode: '0755'
+      owner: deploy
+      group: deploy
+  - name: Copy file script to server
+    copy:
+      src: cpu_check.sh
+      dest: /var/app/cpu_check.sh
+      mode: '0755'
+      owner: deploy
+  - name: Run cpu check script
+    shell: /var/app/cpu_check.sh
+    register: cpu_output
+  - name: Status of script running
+    debug:
+      msg: '{{ cpu_output }}'
+

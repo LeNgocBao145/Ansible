@@ -1,0 +1,13 @@
+- name: Check instances with dynamic inventory
+  hosts: tag_Environment_Testing
+  vars:
+    ansible_user: ec2-user
+  tasks:
+    - name: Ping instances
+      ping:
+    - name: Create hello file
+      copy:
+        content: "Hello from Dynamic Inventory!"
+        dest: /tmp/hello.txt
+        mode: '0644'
+      become: yes

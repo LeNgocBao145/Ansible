@@ -1,0 +1,9 @@
+- name: View vault encrypted variables
+  hosts: localhost
+  connection: local
+  vars_files:
+    - group_vars/dbservers.yml
+  tasks:
+    - name: Debug vault password
+      debug:
+        msg: "Vault password {{ vault_pass }}."

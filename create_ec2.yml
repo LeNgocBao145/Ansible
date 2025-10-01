@@ -1,0 +1,41 @@
+- name: Create EC2 instance on AWS
+  hosts: localhost
+  connection: local
+  vars:
+    instance_type: t2.micro
+    region: ap-southeast-1
+    ami_id: ami-05fd46f12b86c4a6c
+    key_name: my-key-pair
+  tasks:
+    #    - name: Create Security Group
+    #      amazon.aws.ec2_group:
+    #        name: ansible-lab
+    #        description: sg with rule descriptions
+    #        vpc_id: vpc-0cf40861dfda6efc0
+    #        rules:
+    #          - proto: tcp
+    #            ports:
+    #              - 80
+    #            cidr_ip: 0.0.0.0/0
+    #            rule_desc: allow all on port 80
+    #      register: sg
+    #    - name: Debug security group info
+    #      debug:
+    #        msg: "Security group created with ID {{ sg.group_id }} and name {{ sg.group_name }}"
+    - name: Create EC2 instance
+      amazon.aws.ec2_instance:
+        name: "ansible-test-instance"
+        key_name: "{{ key_name }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ ami_id }}"
+        wait: yes
+        region: "{{ region }}"
+        security_group: default
+        network:
+          assign_public_ip: yes
+        tags:
+          Environment: Testing
+      register: ec2
+    - name: Debug instance info
+      debug:
+        msg: "Instance created with ID {{ ec2.instances[0].instance_id }} and IP {{ ec2.instances[0].public_ip_address }}"

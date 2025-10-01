@@ -1,0 +1,14 @@
+- name: Run Hello World on new instance
+  hosts: new_servers
+  tasks:
+    - name: Create hello file
+      copy:
+        content: "Hello World from Ansible on AWS!"
+        dest: /tmp/hello.txt
+        mode: '0644'
+    - name: Debug hello file
+      shell: cat /tmp/hello.txt
+      register: hello_output
+    - name: Print hello message
+      debug:
+        msg: "{{ hello_output.stdout }}"

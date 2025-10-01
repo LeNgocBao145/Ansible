@@ -1,0 +1,9 @@
+- name: Use encrypted variables
+  hosts: localhost
+  connection: local
+  vars_files:
+    - group_vars/webservers
+  tasks:
+    - name: Debug email account info
+      debug:
+        msg: "Email: {{ email_username }}, Email pass: {{ email_pass }}"

@@ -1,0 +1,9 @@
+- name: Use variables in playbook
+  hosts: webservers
+  vars:
+    app_version: 1.0
+    server_name: webserver01
+  tasks:
+    - name: Print variables
+      debug:
+        msg: "App version is {{ app_version }}, server is {{ server_name }}"

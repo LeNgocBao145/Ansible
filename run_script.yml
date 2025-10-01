@@ -1,0 +1,14 @@
+- name: Run Bash script on webservers
+  hosts: webservers
+  tasks:
+    - name: Copy CPU check script
+      copy:
+        src: cpu_check.sh
+        dest: /tmp/cpu_check.sh
+        mode: '0755'
+    - name: Run CPU check script
+      shell: /tmp/cpu_check.sh
+      register: cpu_output
+    - name: Debug CPU output
+      debug:
+        msg: "{{ cpu_output.stdout }}"
